@@ -32,40 +32,22 @@ static bool sfc_hit_sphere(void* data, ray3_t* ray, float t0,
 surface_t* make_sphere(float x, float y, float z, float radius, 
         material_t* material) 
 {
-  point3_t theBase = (*ray).base;
-  vector3_t theDir = (*ray).dir;
-
-  float px = theBase.x;
-  float py = theBase.y;
-  float pz = theBase.z;
-  float vx = theDir.x;
-  float vy = theDir.y;
-  float vz = theDir.z;
-
-  vector3_t baseVector;
-  baseVector.x = px;
-  baseVector.y = py;
-  baseVector.z = pz;
-
-  sphere_data_t sphere = *data;
-  float radius = sphere.radius;
-  point3_t center = sphere.center;
-  vector3_t cVec;
-  cVec.x = center.x;
-  cVec.y = center.y;
-  cVec.z = center.z;
-
-  vector3_t EminusC;
-  subtract(&baseVector, &cVec, &EminusC);
-  
-  float DdotE = dot(theDir, EminusC);
-  float DdotD = dot(theDir, theDir);
-  float EdotE = dot(EminusC, EminusC);
-
-  float radical = DdotE*DdotE - DdotD*(EdotE - radius*radius);
-  
-  sphere_data_t* sdata = (sphere_data_t*)data;
-  return false;
+  point3_t middle;
+  middle.x = x;
+  middle.y = y;
+  middle.z = z;
+  sphere_data_t theSphere;
+  theSphere.center = middle;
+  theSphere.radius = radius;
+  surface_t sphere;
+  void* spherePoint = &theSphere;
+  sphere.data = spherePoint;
+  sphere.material = material;
+  sphere.hit_fn = &sfc_hit_sphere;
+  surface_t* sPoint;
+  sPoint = &sphere;
+  return sPoint;
+}
 }
 
 static bool sfc_hit_sphere(void* data, ray3_t* ray, float t0,
