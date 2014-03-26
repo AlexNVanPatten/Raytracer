@@ -30,8 +30,23 @@ static bool sfc_hit_sphere(void* data, ray3_t* ray, float t0,
         float t1, hit_record_t* hit) ;
 
 surface_t* make_sphere(float x, float y, float z, float radius, 
-        material_t* material) {
-    return NULL ;
+        material_t* material) 
+{
+    point3_t middle;
+    middle.x = x;
+    middle.y = y;
+    middle.z = z;
+    sphere_data_t theSphere;
+    theSphere.center = middle;
+    theSphere.radius = radius;
+    surface_t sphere;
+    void* spherePoint = &theSphere;
+    sphere.data = spherePoint;
+    sphere.material = material;
+    sphere.hit_fn = &sfc_hit_sphere;
+    surface_t* sPoint;
+    sPoint = &sphere;
+    return sPoint;
 }
 
 static bool sfc_hit_sphere(void* data, ray3_t* ray, float t0,
