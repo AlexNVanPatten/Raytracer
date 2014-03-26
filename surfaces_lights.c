@@ -48,7 +48,6 @@ surface_t* make_sphere(float x, float y, float z, float radius,
   sPoint = &sphere;
   return sPoint;
 }
-}
 
 static bool sfc_hit_sphere(void* data, ray3_t* ray, float t0,
 			   float t1, hit_record_t* hit)
