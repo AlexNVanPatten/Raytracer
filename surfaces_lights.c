@@ -50,9 +50,29 @@ surface_t* make_sphere(float x, float y, float z, float radius,
 }
 
 static bool sfc_hit_sphere(void* data, ray3_t* ray, float t0,
-        float t1, hit_record_t* hit) {
-    sphere_data_t* sdata = (sphere_data_t*)data ;
-    return false ;
+        float t1, hit_record_t* hit) 
+{
+static bool sfc_hit_sphere(void* data, ray3_t* ray, float t0,
+			   float t1, hit_record_t* hit)
+{
+  point3_t theBase = (*ray).base;
+  vector3_t theDir = (*ray).dir;
+  float px = theBase.x;
+  float py = theBase.y;
+  float pz = theBase.z;
+  float vx = theDir.x;
+  float vy = theDir.y;
+  float vz = theDir.z;
+  vector3_t baseVector;
+  baseVector.x = px;
+  baseVector.y = py;
+  baseVector.z = pz;
+  float DdotE = dot(theDir, baseVector);
+  float DdotD = dot(theDir, theDir);
+  float EdotE = dot(baseVector, baseVector);
+  
+  sphere_data_t* sdata = (sphere_data_t*)data;
+  return false ;
 }
 
 bool sfc_hit(surface_t* sfc, ray3_t* ray, float t0, float t1,
