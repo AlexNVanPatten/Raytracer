@@ -69,29 +69,85 @@ surface_t* make_sphere(float x, float y, float z, float radius,
 }
 
 static bool sfc_hit_sphere(void* data, ray3_t* ray, float t0,
-        float t1, hit_record_t* hit) 
-{
-static bool sfc_hit_sphere(void* data, ray3_t* ray, float t0,
 			   float t1, hit_record_t* hit)
 {
+  //Get the base and direction of the ray.
   point3_t theBase = (*ray).base;
   vector3_t theDir = (*ray).dir;
-  float px = theBase.x;
-  float py = theBase.y;
-  float pz = theBase.z;
-  float vx = theDir.x;
-  float vy = theDir.y;
-  float vz = theDir.z;
+
+  //Change point into vector for vector math
   vector3_t baseVector;
-  baseVector.x = px;
-  baseVector.y = py;
-  baseVector.z = pz;
-  float DdotE = dot(theDir, baseVector);
+  baseVector.x = theBase.x;
+  baseVector.y = theBase.y;
+  baseVector.z = theBase.z;
+
+  //Dereferance Sphere
+  sphere_data_t* sdata = (sphere_data_t*) data;
+  sphere_data_t sphere = *sdata;
+
+  //Get radius and center as a vector for vector math
+  float radius = sphere.radius;
+  point3_t center = sphere.center;
+  vector3_t cVec;
+  cVec.x = center.x;
+  cVec.y = center.y;
+  cVec.z = center.z;
+
+  //calculate dot products for vector math
+  vector3_t EminusC;
+  subtract(&baseVector, &cVec, &EminusC);
+  float DdotE = dot(theDir, EminusC);
   float DdotD = dot(theDir, theDir);
-  float EdotE = dot(baseVector, baseVector);
+  float EdotE = dot(EminusC, EminusC);
   
-  sphere_data_t* sdata = (sphere_data_t*)data;
-  return false ;
+  //Calculate radical of quadractic equation
+  float radical = DdotE*DdotE - DdotD*(EdotE - radius*radius);
+  
+  //If radical is less than zero, no intersections, return false.
+  if(radical < 0)
+    {
+      return false;
+    }
+  else
+    {
+      //Get root of radical if it exists.
+      float root = (float) Math.Sqrt((double) radical);
+
+      //Minus intersection is always closer, so calculate that
+      float intersect = (-DdotE-root)/DdotD;
+      
+      //Check if intersection is within valid range
+      if(intersect < t0 || intersect > t1)
+	{
+	  return false;
+	}
+      else
+	{
+	  //If it is, calcuate infromation for hit record.
+	  (*hit).t = intersect;
+
+	  //Calculate intersection Point
+	  vector3_t vMult;
+	  vector3_t vIntersection;
+	  multiply(theDir, intersect, vMult);
+	  subtract(baseVector, vMult, vIntersection);
+	  point3_t intPoint;
+	  intPoint.x = vIntersection.x;
+	  intPoint.y = vIntersection.y;
+	  intPoint.z = vIntersection.z;
+	  (*hit).hit_pt = intPoint;
+
+	  //Calculate Surface Normal
+	  vector3_t vSNorm;
+	  subtract(vIntersction, cVec, vSNorm);
+	  normalize(vSNorm);
+	  (*hit).normal = vSNorm;
+
+	  return true;
+	}
+    }
+      
+  return false;
 }
 
 bool sfc_hit(surface_t* sfc, ray3_t* ray, float t0, float t1,
